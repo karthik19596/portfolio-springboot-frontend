@@ -1,0 +1,116 @@
+<div class="dashboard">
+  <header class="dashboard-header">
+    <div>
+      <h1 class="dashboard-title">{{ greeting() }}, {{ user()?.username }}</h1>
+      <p class="dashboard-subtitle">Here is where your work stands today.</p>
+    </div>
+    <div class="dashboard-actions">
+      <button mat-raised-button color="primary" routerLink="/tasks">
+        <mat-icon>add</mat-icon>
+        New Task
+      </button>
+      <button mat-stroked-button routerLink="/tasks">
+        <mat-icon>list</mat-icon>
+        All Tasks
+      </button>
+      @if (isAdmin()) {
+        <button mat-stroked-button routerLink="/audit-logs">
+          <mat-icon>history</mat-icon>
+          Audit Logs
+        </button>
+      }
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="dashboard-loading">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  } @else if (error()) {
+    <mat-card class="page-card">
+      <div class="empty-state">
+        <mat-icon class="empty-state-icon">error_outline</mat-icon>
+        <p>{{ error() }}</p>
+        <button mat-stroked-button color="primary" (click)="load()">Try again</button>
+      </div>
+    </mat-card>
+  } @else {
+    <section class="stat-grid">
+      @for (card of statCards(); track card.label) {
+        <mat-card class="stat-card" [class]="'accent-' + card.accent">
+          <div class="stat-icon">
+            <mat-icon>{{ card.icon }}</mat-icon>
+          </div>
+          <div class="stat-body">
+            <span class="stat-value">{{ card.value }}</span>
+            <span class="stat-label">{{ card.label }}</span>
+          </div>
+        </mat-card>
+      }
+    </section>
+
+    <section class="dashboard-columns">
+      <mat-card class="page-card">
+        <h2 class="section-title">Completion</h2>
+        <div class="completion">
+          <span class="completion-value">{{ stats()?.completionRate }}%</span>
+          <span class="completion-caption">
+            {{ stats()?.done }} of {{ stats()?.total }} tasks done
+          </span>
+        </div>
+        <mat-progress-bar
+          mode="determinate"
+          [value]="stats()?.completionRate || 0"
+        ></mat-progress-bar>
+
+        <h2 class="section-title mt-2">By Priority</h2>
+        @for (bar of priorityBars(); track bar.label) {
+          <div class="priority-row">
+            <span class="priority-label">{{ bar.label }}</span>
+            <div class="priority-track">
+              <div
+                class="priority-fill"
+                [class]="'fill-' + bar.accent"
+                [style.width.%]="bar.percent"
+              ></div>
+            </div>
+            <span class="priority-count">{{ bar.value }}</span>
+          </div>
+        }
+      </mat-card>
+
+      <mat-card class="page-card">
+        <h2 class="section-title">Recent Tasks</h2>
+        @if (recentTasks().length === 0) {
+          <div class="empty-state">
+            <mat-icon class="empty-state-icon">inbox</mat-icon>
+            <p>No tasks yet. Create your first one to get started.</p>
+            <button mat-raised-button color="primary" routerLink="/tasks">
+              Create a task
+            </button>
+          </div>
+        } @else {
+          <mat-list>
+            @for (task of recentTasks(); track task.id) {
+              <mat-list-item class="recent-item">
+                <span matListItemTitle class="recent-title">{{ task.title }}</span>
+                <span matListItemLine class="recent-meta">
+                  <span class="status-badge" [class]="statusClass(task.status)">
+                    {{ statusLabel(task.status) }}
+                  </span>
+                  <span class="recent-date">{{ formatDate(task.createdAt) }}</span>
+                </span>
+              </mat-list-item>
+            }
+          </mat-list>
+          <div class="recent-footer">
+            <a mat-button color="primary" routerLink="/tasks">
+              View all tasks
+              <mat-icon>arrow_forward</mat-icon>
+            </a>
+          </div>
+        }
+      </mat-card>
+    </section>
+  }
+</div>

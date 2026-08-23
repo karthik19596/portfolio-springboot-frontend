@@ -1,18 +1,22 @@
 <mat-toolbar color="primary" class="app-toolbar">
-  <span class="brand">
+  <a class="brand" routerLink="/" matTooltip="Go to home page">
     <mat-icon>assignment_turned_in</mat-icon>
     <span class="brand-text">Task Portfolio</span>
-  </span>
+  </a>
 
   <span class="toolbar-spacer"></span>
 
   @if (authService.isAuthenticated()) {
     <nav class="nav-links">
+      <a mat-button routerLink="/dashboard" routerLinkActive="active-link">
+        <mat-icon>dashboard</mat-icon>
+        Dashboard
+      </a>
       <a mat-button routerLink="/tasks" routerLinkActive="active-link">
         <mat-icon>task</mat-icon>
         Tasks
       </a>
-      @if (authService.user()?.role === 'ADMIN') {
+      @if (isAdmin()) {
         <a mat-button routerLink="/audit-logs" routerLinkActive="active-link">
           <mat-icon>history</mat-icon>
           Audit Logs
@@ -22,14 +26,45 @@
 
     <span class="toolbar-spacer"></span>
 
-    <span class="user-name">
-      <mat-icon>account_circle</mat-icon>
-      {{ authService.user()?.username }}
-    </span>
-
-    <button mat-icon-button (click)="logout()" aria-label="Logout">
-      <mat-icon>logout</mat-icon>
+    <button
+      class="avatar-button"
+      [matMenuTriggerFor]="accountMenu"
+      matTooltip="Account"
+      aria-label="Open account menu"
+    >
+      <span class="avatar">{{ initials() }}</span>
     </button>
+
+    <mat-menu #accountMenu="matMenu" xPosition="before" class="account-menu">
+      <div class="account-header" (click)="$event.stopPropagation()">
+        <span class="avatar avatar-lg">{{ initials() }}</span>
+        <div class="account-identity">
+          <span class="account-username">{{ authService.user()?.username }}</span>
+          @if (authService.profile(); as profile) {
+            <span class="account-email">{{ profile.email }}</span>
+          }
+          <span class="account-role">{{ authService.user()?.role }}</span>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <a mat-menu-item routerLink="/dashboard">
+        <mat-icon>dashboard</mat-icon>
+        <span>Dashboard</span>
+      </a>
+      <a mat-menu-item routerLink="/tasks">
+        <mat-icon>task</mat-icon>
+        <span>My Tasks</span>
+      </a>
+
+      <mat-divider></mat-divider>
+
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Logout</span>
+      </button>
+    </mat-menu>
   }
 </mat-toolbar>
 

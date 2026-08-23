@@ -23,6 +23,17 @@ export interface TaskPage {
   number: number;
 }
 
+export interface TaskStats {
+  total: number;
+  todo: number;
+  inProgress: number;
+  done: number;
+  lowPriority: number;
+  mediumPriority: number;
+  highPriority: number;
+  completionRate: number;
+}
+
 export const TASK_STATUSES: { value: Task['status']; label: string }[] = [
   { value: 'TODO', label: 'To Do' },
   { value: 'IN_PROGRESS', label: 'In Progress' },

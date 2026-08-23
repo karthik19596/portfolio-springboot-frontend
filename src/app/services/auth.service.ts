@@ -2,7 +2,13 @@ import { Injectable, Inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { ApiResponse } from '../models/api-response';
-import { AuthResponse, LoginRequest, SignupRequest, User } from '../models/auth';
+import {
+  AuthResponse,
+  LoginRequest,
+  SignupRequest,
+  User,
+  UserProfile,
+} from '../models/auth';
 import { API_BASE_URL } from './api-config';
 
 @Injectable({
@@ -15,7 +21,11 @@ export class AuthService {
   private readonly currentUser = signal<User | null>(this.loadUser());
   readonly user = this.currentUser.asReadonly();
 
-  isAuthenticated = signal<boolean>(this.hasToken());
+  private readonly authenticated = signal<boolean>(this.hasValidToken());
+  readonly isAuthenticated = this.authenticated.asReadonly();
+
+  private readonly currentProfile = signal<UserProfile | null>(null);
+  readonly profile = this.currentProfile.asReadonly();
 
   constructor(
     private readonly http: HttpClient,
@@ -60,16 +70,55 @@ export class AuthService {
     );
   }
 
+  loadProfile(): Observable<ApiResponse<UserProfile>> {
+    return this.http
+      .get<ApiResponse<UserProfile>>(`${this.apiUrl}/auth/me`)
+      .pipe(
+        tap((response) => {
+          if (response.success && response.data) {
+            this.currentProfile.set(response.data);
+          }
+        })
+      );
+  }
+
   logout(): void {
-    localStorage.removeItem(this.tokenKey);
-    localStorage.removeItem(this.userKey);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(this.tokenKey);
+      localStorage.removeItem(this.userKey);
+    }
     this.currentUser.set(null);
-    this.isAuthenticated.set(false);
+    this.currentProfile.set(null);
+    this.authenticated.set(false);
+  }
+
+  /** Epoch milliseconds at which the stored token stops being accepted. */
+  getExpiresAt(): number | null {
+    if (typeof window === 'undefined') return null;
+    const token = localStorage.getItem(this.tokenKey);
+    if (!token) return null;
+    const payload = this.decodeTokenPayload(token);
+    return typeof payload?.exp === 'number' ? payload.exp * 1000 : null;
   }
 
   getToken(): string | null {
     if (typeof window === 'undefined') return null;
-    return localStorage.getItem(this.tokenKey);
+    const token = localStorage.getItem(this.tokenKey);
+    if (!token || this.isTokenExpired(token)) return null;
+    return token;
+  }
+
+  /**
+   * Re-checks the stored token against its `exp` claim and clears the session
+   * if it has lapsed. Route guards run outside Angular's reactive graph, so the
+   * signals need an explicit sync point rather than reacting on their own.
+   */
+  refreshAuthState(): boolean {
+    const valid = this.hasValidToken();
+    if (!valid && this.authenticated()) {
+      this.logout();
+    }
+    return valid;
   }
 
   private saveAuth(auth: AuthResponse): void {
@@ -77,7 +126,7 @@ export class AuthService {
     const user: User = { username: auth.username, role: auth.role };
     localStorage.setItem(this.userKey, JSON.stringify(user));
     this.currentUser.set(user);
-    this.isAuthenticated.set(true);
+    this.authenticated.set(true);
   }
 
   private loadUser(): User | null {
@@ -91,8 +140,38 @@ export class AuthService {
     }
   }
 
-  private hasToken(): boolean {
+  private hasValidToken(): boolean {
     if (typeof window === 'undefined') return false;
-    return !!localStorage.getItem(this.tokenKey);
+    const token = localStorage.getItem(this.tokenKey);
+    return !!token && !this.isTokenExpired(token);
+  }
+
+  private isTokenExpired(token: string): boolean {
+    const payload = this.decodeTokenPayload(token);
+    // An unreadable token is worthless to the API, so treat it as expired.
+    if (!payload || typeof payload.exp !== 'number') return true;
+    return payload.exp * 1000 <= Date.now();
+  }
+
+  private decodeTokenPayload(token: string): { exp?: number } | null {
+    const segments = token.split('.');
+    if (segments.length !== 3) return null;
+
+    try {
+      const base64 = segments[1].replace(/-/g, '+').replace(/_/g, '/');
+      const padded = base64.padEnd(
+        base64.length + ((4 - (base64.length % 4)) % 4),
+        '='
+      );
+      const binary = atob(padded);
+      const json = decodeURIComponent(
+        Array.from(binary, (char) =>
+          '%' + char.charCodeAt(0).toString(16).padStart(2, '0')
+        ).join('')
+      );
+      return JSON.parse(json) as { exp?: number };
+    } catch {
+      return null;
+    }
   }
 }

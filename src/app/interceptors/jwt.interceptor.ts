@@ -8,6 +8,10 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
+  // The login endpoint answers bad credentials with 401; treating that as an
+  // expired session would clobber the form's own error handling.
+  const isAuthRequest = req.url.includes('/auth/');
+
   const token = authService.getToken();
   if (token && !req.url.startsWith('http')) {
     req = req.clone({
@@ -19,9 +23,17 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 401 || error.status === 403) {
+      // 403 means authenticated but not permitted, which is not a reason to
+      // end the session.
+      if (error.status === 401 && !isAuthRequest) {
+        const returnUrl = router.url;
         authService.logout();
-        router.navigate(['/login']);
+        router.navigate(['/login'], {
+          queryParams:
+            returnUrl && returnUrl !== '/' && !returnUrl.startsWith('/login')
+              ? { returnUrl }
+              : {},
+        });
       }
       return throwError(() => error);
     })

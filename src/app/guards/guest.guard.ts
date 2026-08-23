@@ -2,14 +2,14 @@ import { CanActivateFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 
-export const adminGuard: CanActivateFn = () => {
+/** Keeps signed-in users out of the public landing page. */
+export const guestGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
-  const user = authService.user();
 
-  if (user?.role === 'ADMIN') {
-    return true;
+  if (authService.refreshAuthState()) {
+    return router.createUrlTree(['/dashboard']);
   }
 
-  return router.createUrlTree(['/dashboard']);
+  return true;
 };

@@ -1,0 +1,93 @@
+<mat-toolbar color="primary" class="home-toolbar">
+  <a class="brand" routerLink="/">
+    <mat-icon>assignment_turned_in</mat-icon>
+    <span class="brand-text">Task Portfolio</span>
+  </a>
+
+  <span class="toolbar-spacer"></span>
+
+  @if (isAuthenticated()) {
+    <a mat-raised-button color="accent" routerLink="/dashboard" class="signup-button">
+      <mat-icon>dashboard</mat-icon>
+      Go to Dashboard
+    </a>
+  } @else {
+    <a mat-button routerLink="/login">Login</a>
+    <a mat-raised-button color="accent" routerLink="/register" class="signup-button">
+      Sign Up
+    </a>
+  }
+</mat-toolbar>
+
+<main class="home">
+  <section class="hero">
+    <div class="container hero-inner">
+      <h1 class="hero-title">Organize your work, one task at a time.</h1>
+      <p class="hero-subtitle">
+        A full-stack task manager built with Spring Boot and Angular. Track what
+        you are working on, see progress at a glance, and keep a full audit trail
+        of every change.
+      </p>
+      <div class="hero-actions">
+        @if (isAuthenticated()) {
+          <a mat-raised-button color="primary" routerLink="/dashboard" class="hero-cta">
+            Back to your dashboard
+            <mat-icon>arrow_forward</mat-icon>
+          </a>
+        } @else {
+          <a mat-raised-button color="primary" routerLink="/register" class="hero-cta">
+            Get Started
+            <mat-icon>arrow_forward</mat-icon>
+          </a>
+          <a mat-stroked-button routerLink="/login" class="hero-cta">
+            I already have an account
+          </a>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="container section">
+    <h2 class="section-heading">What it does</h2>
+    <div class="feature-grid">
+      @for (feature of features; track feature.title) {
+        <mat-card class="feature-card">
+          <div class="feature-icon">
+            <mat-icon>{{ feature.icon }}</mat-icon>
+          </div>
+          <h3 class="feature-title">{{ feature.title }}</h3>
+          <p class="feature-description">{{ feature.description }}</p>
+        </mat-card>
+      }
+    </div>
+  </section>
+
+  <section class="container section">
+    <h2 class="section-heading">Built with</h2>
+    <div class="tech-list">
+      @for (tech of techStack; track tech) {
+        <span class="tech-chip">{{ tech }}</span>
+      }
+    </div>
+  </section>
+
+  @if (!isAuthenticated()) {
+    <section class="cta-band">
+      <div class="container cta-inner">
+        <div>
+          <h2 class="cta-title">Ready to try it?</h2>
+          <p class="cta-subtitle">Create an account and add your first task in under a minute.</p>
+        </div>
+        <a mat-raised-button color="primary" routerLink="/register" class="hero-cta">
+          Create free account
+        </a>
+      </div>
+    </section>
+  }
+
+  <footer class="home-footer">
+    <div class="container">
+      <span>Task Portfolio &mdash; Spring Boot + Angular full-stack demo</span>
+    </div>
+  </footer>
+</main>

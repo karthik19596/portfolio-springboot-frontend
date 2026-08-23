@@ -1,0 +1,19 @@
+<h2 mat-dialog-title class="expiry-title">
+  <mat-icon color="warn">schedule</mat-icon>
+  Session expiring soon
+</h2>
+
+<mat-dialog-content>
+  <p>
+    You will be signed out in
+    <strong class="expiry-countdown">{{ countdown() }}</strong>.
+  </p>
+  <p class="expiry-hint">Please save any work in progress.</p>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="dismiss()">Dismiss</button>
+  <button mat-raised-button color="warn" (click)="logoutNow()">
+    Sign out now
+  </button>
+</mat-dialog-actions>

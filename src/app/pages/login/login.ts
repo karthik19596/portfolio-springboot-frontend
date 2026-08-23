@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -31,6 +31,7 @@ export class Login {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly snackBar = inject(MatSnackBar);
 
   loginForm = this.fb.group({
@@ -54,7 +55,7 @@ export class Login {
       next: (response) => {
         this.loading.set(false);
         if (response.success) {
-          this.router.navigate(['/tasks']);
+          this.router.navigateByUrl(this.resolveReturnUrl());
         } else {
           this.showError(response.message || 'Login failed.');
         }
@@ -66,6 +67,16 @@ export class Login {
         this.showError(message);
       },
     });
+  }
+
+  /** Rejects protocol-relative and absolute values so the query param cannot
+   *  be used to bounce a user off-site after login. */
+  private resolveReturnUrl(): string {
+    const target = this.route.snapshot.queryParamMap.get('returnUrl');
+    if (target && target.startsWith('/') && !target.startsWith('//')) {
+      return target;
+    }
+    return '/dashboard';
   }
 
   private showError(message: string): void {

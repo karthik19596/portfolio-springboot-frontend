@@ -154,7 +154,7 @@ export class Register implements OnInit {
       next: (response) => {
         this.loading.set(false);
         if (response.success) {
-          this.router.navigate(['/tasks']);
+          this.router.navigate(['/dashboard']);
         } else {
           this.showError(response.message || 'Registration failed.');
         }

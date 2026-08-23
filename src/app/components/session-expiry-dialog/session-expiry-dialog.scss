@@ -1,0 +1,16 @@
+.expiry-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.expiry-countdown {
+  font-variant-numeric: tabular-nums;
+  color: #c62828;
+}
+
+.expiry-hint {
+  margin-bottom: 0;
+  color: #607d8b;
+  font-size: 0.9rem;
+}

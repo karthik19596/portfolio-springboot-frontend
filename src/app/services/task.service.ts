@@ -2,7 +2,7 @@ import { Injectable, Inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '../models/api-response';
-import { Task, TaskPage, TaskRequest } from '../models/task';
+import { Task, TaskPage, TaskRequest, TaskStats } from '../models/task';
 import { API_BASE_URL } from './api-config';
 
 export interface PageableParams {
@@ -40,6 +40,10 @@ export class TaskService {
     return this.http.get<ApiResponse<TaskPage>>(`${this.apiUrl}/tasks`, {
       params: httpParams,
     });
+  }
+
+  getStats(): Observable<ApiResponse<TaskStats>> {
+    return this.http.get<ApiResponse<TaskStats>>(`${this.apiUrl}/tasks/stats`);
   }
 
   getTask(id: number): Observable<ApiResponse<Task>> {
