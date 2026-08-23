@@ -1,0 +1,72 @@
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  margin-bottom: 16px;
+
+  h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 600;
+  }
+}
+
+.loading-overlay {
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: #ffebee;
+  border-radius: 8px;
+  color: #c62828;
+}
+
+.task-title {
+  font-weight: 500;
+}
+
+.task-description {
+  font-size: 12px;
+  color: #78909c;
+  max-width: 360px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status-badge {
+  min-width: 80px;
+  text-align: center;
+}
+
+.priority-high,
+.priority-medium,
+.priority-low {
+  text-transform: uppercase;
+  font-size: 13px;
+}
+
+mat-paginator {
+  margin-top: 16px;
+  border-radius: 0 0 12px 12px;
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .task-description {
+    max-width: 120px;
+  }
+}

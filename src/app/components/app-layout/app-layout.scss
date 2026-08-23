@@ -1,0 +1,51 @@
+.app-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.nav-links {
+  display: flex;
+  gap: 8px;
+}
+
+.active-link {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.user-name {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  margin-right: 8px;
+  opacity: 0.95;
+}
+
+.main-content {
+  padding-bottom: 48px;
+}
+
+@media (max-width: 768px) {
+  .brand-text {
+    display: none;
+  }
+
+  .user-name {
+    display: none;
+  }
+
+  .nav-links a {
+    min-width: auto;
+    padding: 0 8px;
+  }
+}

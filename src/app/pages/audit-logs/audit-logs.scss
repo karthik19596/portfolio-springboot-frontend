@@ -1,0 +1,40 @@
+.page-header {
+  margin-top: 24px;
+  margin-bottom: 16px;
+
+  h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 600;
+  }
+}
+
+.loading-overlay {
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: #ffebee;
+  border-radius: 8px;
+  color: #c62828;
+}
+
+.action-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: capitalize;
+}
+
+@media (max-width: 768px) {
+  .table-responsive {
+    font-size: 13px;
+  }
+}

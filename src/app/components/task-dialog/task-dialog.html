@@ -1,0 +1,56 @@
+<h2 mat-dialog-title>
+  @if (isEdit) {
+    Edit Task
+  } @else {
+    New Task
+  }
+</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="taskForm" id="task-form" class="task-form" (ngSubmit)="save()">
+    <mat-form-field appearance="outline" class="full-width mb-2">
+      <mat-label>Title</mat-label>
+      <input matInput formControlName="title" required maxlength="200" />
+      @if (taskForm.get('title')?.invalid && taskForm.get('title')?.touched) {
+        <mat-error>Title is required.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width mb-2">
+      <mat-label>Description</mat-label>
+      <textarea
+        matInput
+        formControlName="description"
+        rows="4"
+        maxlength="2000"
+      ></textarea>
+    </mat-form-field>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Status</mat-label>
+        <mat-select formControlName="status" required>
+          @for (status of statuses; track status.value) {
+            <mat-option [value]="status.value">{{ status.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Priority</mat-label>
+        <mat-select formControlName="priority" required>
+          @for (priority of priorities; track priority.value) {
+            <mat-option [value]="priority.value">{{ priority.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancel</button>
+  <button mat-raised-button color="primary" (click)="save()" [disabled]="taskForm.invalid">
+    {{ isEdit ? 'Update' : 'Create' }}
+  </button>
+</mat-dialog-actions>

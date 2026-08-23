@@ -1,0 +1,101 @@
+<div class="page-header">
+  <h1>Tasks</h1>
+  <button mat-raised-button color="primary" (click)="openCreateDialog()">
+    <mat-icon>add</mat-icon>
+    New Task
+  </button>
+</div>
+
+<mat-card class="page-card">
+  @if (loading()) {
+    <div class="loading-overlay">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  }
+
+  @if (error(); as errorMessage) {
+    <div class="error-message">
+      <mat-icon color="warn">error</mat-icon>
+      <span>{{ errorMessage }}</span>
+    </div>
+  }
+
+  <div class="table-responsive">
+    <table mat-table [dataSource]="tasks()" matSort (matSortChange)="onSortChange($event)">
+      <ng-container matColumnDef="title">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Title</th>
+        <td mat-cell *matCellDef="let task">
+          <div class="task-title">{{ task.title }}</div>
+          <div class="task-description">{{ task.description || 'No description' }}</div>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+        <td mat-cell *matCellDef="let task">
+          <span class="status-badge" [class]="statusClass(task.status)">
+            {{ statusLabel(task.status) }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="priority">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Priority</th>
+        <td mat-cell *matCellDef="let task" [class]="priorityClass(task.priority)">
+          {{ task.priority }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="createdAt">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Created</th>
+        <td mat-cell *matCellDef="let task">{{ formatDate(task.createdAt) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let task">
+          <button
+            mat-icon-button
+            color="primary"
+            matTooltip="Edit task"
+            (click)="openEditDialog(task)"
+          >
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            color="warn"
+            matTooltip="Delete task"
+            (click)="confirmDelete(task)"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+
+  @if (tasks().length === 0 && !loading() && !error()) {
+    <div class="empty-state">
+      <mat-icon class="empty-state-icon">inbox</mat-icon>
+      <h3>No tasks yet</h3>
+      <p>Create your first task to get started.</p>
+      <button mat-raised-button color="primary" (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon>
+        New Task
+      </button>
+    </div>
+  }
+
+  <mat-paginator
+    [length]="taskPage()?.totalElements ?? 0"
+    [pageSize]="pageSize"
+    [pageIndex]="pageIndex"
+    [pageSizeOptions]="[5, 10, 25, 50]"
+    (page)="onPageChange($event)"
+    aria-label="Select page of tasks"
+  ></mat-paginator>
+</mat-card>
