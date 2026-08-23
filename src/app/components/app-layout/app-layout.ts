@@ -46,7 +46,9 @@ export class AppLayout {
   }
 
   logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
+    this.authService.signOut();
+    // Home, not /login: leaving on purpose is not the same as being kicked
+    // out, so there is no returnUrl to come back to.
+    this.router.navigate(['/']);
   }
 }

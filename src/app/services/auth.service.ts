@@ -82,7 +82,22 @@ export class AuthService {
       );
   }
 
-  logout(): void {
+  /**
+   * Asks the API to revoke the token, then drops it locally. The request is
+   * fire-and-forget: the local session must end even if the call fails, and
+   * the token is worthless to us either way.
+   */
+  signOut(): void {
+    if (this.getToken()) {
+      this.http
+        .post<ApiResponse<void>>(`${this.apiUrl}/auth/logout`, {})
+        .subscribe({ error: () => undefined });
+    }
+    this.clearSession();
+  }
+
+  /** Drops local session state without contacting the API. */
+  clearSession(): void {
     if (typeof window !== 'undefined') {
       localStorage.removeItem(this.tokenKey);
       localStorage.removeItem(this.userKey);
@@ -116,7 +131,7 @@ export class AuthService {
   refreshAuthState(): boolean {
     const valid = this.hasValidToken();
     if (!valid && this.authenticated()) {
-      this.logout();
+      this.clearSession();
     }
     return valid;
   }

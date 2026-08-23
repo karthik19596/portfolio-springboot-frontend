@@ -86,7 +86,9 @@ export class SessionMonitorService {
     this.closeDialog();
 
     const returnUrl = this.router.url;
-    this.authService.logout();
+    // signOut revokes only while the token is still live, which covers the
+    // "Sign out now" button and skips the pointless call once it has lapsed.
+    this.authService.signOut();
     this.router.navigate(['/login'], {
       queryParams:
         returnUrl && returnUrl !== '/' && !returnUrl.startsWith('/login')
