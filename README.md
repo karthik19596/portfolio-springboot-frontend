@@ -2,6 +2,10 @@
 
 Angular frontend for the **Portfolio Spring Boot Backend** task management API.
 
+Repository: `https://github.com/karthik19596/portfolio-springboot-frontend`
+
+Matching backend: `https://github.com/karthik19596/portfolio-springboot-backend`
+
 ## Tech Stack
 
 - Angular 22 (standalone components, zoneless change detection)
@@ -13,6 +17,8 @@ Angular frontend for the **Portfolio Spring Boot Backend** task management API.
 ## Features
 
 - **Login / Register** with JWT auth and role-based routing
+- Real-time username and email availability checks on blur
+- Field-level server validation error messages
 - **Task Dashboard** with paginated, sortable task list
 - **Create / Edit / Delete** tasks via Material dialogs
 - **Admin Audit Logs** viewer (visible only to `ADMIN` users)
@@ -41,33 +47,41 @@ portfolio-springboot-frontend/
 
 ## Prerequisites
 
-- Node.js 20+ (v24 installed in this environment)
-- npm 10+
-- Angular CLI 22+
+- Node.js 20 or later
+- npm 10 or later
+- Angular CLI 22 or later
 - The backend running at `http://localhost:8080`
 
 ## Install Dependencies
 
-```powershell
-cd D:\Projects\Portfolio\portfolio-springboot-frontend
+```bash
 npm install
+```
+
+If you are on Windows PowerShell and get a script execution policy error, use:
+
+```powershell
+npm.cmd install
 ```
 
 ## Run the Frontend
 
-Make sure the backend is running first:
+Make sure the backend is running first. From the backend repository:
 
-```powershell
-# In one terminal, from the backend root
-cd D:\Projects\Portfolio\portfolio-springboot-backend
+```bash
 mvn spring-boot:run
 ```
 
 Then start the Angular dev server:
 
-```powershell
-cd D:\Projects\Portfolio\portfolio-springboot-frontend
+```bash
 ng serve --open
+```
+
+If you are on Windows PowerShell and get a script execution policy error, use:
+
+```powershell
+ng.cmd serve --open
 ```
 
 The app opens at `http://localhost:4200`.
@@ -76,20 +90,21 @@ API requests to `/api` are proxied to the backend at `http://localhost:8080` via
 
 ## Build for Production
 
-```powershell
+```bash
 ng build --configuration production
 ```
 
-Output is written to `frontend/dist/frontend`.
+Output is written to `dist/portfolio-springboot-frontend`.
 
-## Default Demo Accounts
+## Default Accounts
 
-Use the backend signup flow to create accounts, or register a new user from the UI.
+Use the backend signup flow or the register page in the UI to create accounts.
 
 - Admin audit logs are available only for users whose role is `ADMIN`.
 - The backend assigns the role supplied during signup (defaults to `USER`).
 
 ## Notes
 
-- A CORS config was added to the backend (`WebConfig.java`) so the frontend can talk to the API directly during development.
+- A CORS config was added to the backend (`WebConfig.java`) so the frontend can talk to the API during development.
 - The API base URL is configurable via the `API_BASE_URL` injection token; it defaults to `/api`.
+- The frontend uses Angular zoneless change detection with signals for reactive state.
