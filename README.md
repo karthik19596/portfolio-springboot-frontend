@@ -24,6 +24,7 @@ Matching backend: `https://github.com/karthik19596/portfolio-springboot-backend`
 - **Task Dashboard** with paginated, sortable task list
 - **Create / Edit / Delete** tasks via Material dialogs
 - **Admin Dashboard** for users, roles, and tasks
+- Admin task assignment with role-aware assignee selection
 - `USER`, `ADMIN`, and `SUPER_ADMIN` role badges and navigation
 - **Admin Audit Logs** viewer (visible to `ADMIN` and `SUPER_ADMIN` users)
 - Ten-minute inactivity warning and fifteen-minute automatic logout

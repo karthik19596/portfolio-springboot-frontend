@@ -53,6 +53,16 @@ export class AdminDashboard implements OnInit {
     password: ['', [Validators.required, Validators.minLength(6)]],
     role: ['USER' as AdminUser['role'], Validators.required],
   });
+  readonly showAddTask = signal(false);
+  readonly creatingTask = signal(false);
+  readonly addTaskError = signal<string | null>(null);
+  readonly newTaskForm = this.formBuilder.group({
+    title: ['', [Validators.required, Validators.maxLength(200)]],
+    description: ['', [Validators.maxLength(2000)]],
+    assignedUserId: [null as number | null, Validators.required],
+    status: ['TODO' as AdminTask['status'], Validators.required],
+    priority: ['MEDIUM' as AdminTask['priority'], Validators.required],
+  });
 
   readonly userColumns = ['username', 'email', 'role', 'createdAt', 'actions'];
   readonly taskColumns = ['title', 'owner', 'status', 'priority', 'createdAt', 'actions'];
@@ -142,6 +152,55 @@ export class AdminDashboard implements OnInit {
       error: (error) => {
         this.creatingUser.set(false);
         this.addUserError.set(error.error?.message || 'Could not create user.');
+      },
+    });
+  }
+
+  openAddTask(): void {
+    this.newTaskForm.reset({
+      title: '',
+      description: '',
+      assignedUserId: null,
+      status: 'TODO',
+      priority: 'MEDIUM',
+    });
+    this.addTaskError.set(null);
+    this.showAddTask.set(true);
+  }
+
+  cancelAddTask(): void {
+    this.showAddTask.set(false);
+    this.addTaskError.set(null);
+  }
+
+  createTask(): void {
+    this.addTaskError.set(null);
+    if (this.newTaskForm.invalid) {
+      this.newTaskForm.markAllAsTouched();
+      return;
+    }
+    const value = this.newTaskForm.getRawValue();
+    this.creatingTask.set(true);
+    this.adminService.createTask({
+      title: value.title!,
+      description: value.description ?? '',
+      assignedUserId: value.assignedUserId!,
+      status: value.status!,
+      priority: value.priority!,
+    }).subscribe({
+      next: (response) => {
+        this.creatingTask.set(false);
+        if (response.success) {
+          this.tasks.update((tasks) => [response.data, ...tasks]);
+          this.cancelAddTask();
+          this.showMessage('Task assigned.');
+        } else {
+          this.addTaskError.set(response.message);
+        }
+      },
+      error: (error) => {
+        this.creatingTask.set(false);
+        this.addTaskError.set(error.error?.message || 'Could not assign task.');
       },
     });
   }

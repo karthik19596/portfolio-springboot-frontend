@@ -21,6 +21,21 @@
   flex: 1 1 180px;
 }
 
+.add-task-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 8px 0 20px;
+  padding: 16px;
+  border-radius: 8px;
+  background: #f5f7ff;
+}
+
+.add-task-form mat-form-field {
+  flex: 1 1 180px;
+}
+
 .form-actions {
   display: flex;
   align-items: center;

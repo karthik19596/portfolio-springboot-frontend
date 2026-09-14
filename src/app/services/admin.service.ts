@@ -60,6 +60,13 @@ export class AdminService {
     );
   }
 
+  createTask(request: TaskRequest): Observable<ApiResponse<AdminTask>> {
+    return this.http.post<ApiResponse<AdminTask>>(
+      `${this.apiUrl}/admin/tasks`,
+      request
+    );
+  }
+
   updateTask(id: number, request: TaskRequest): Observable<ApiResponse<AdminTask>> {
     return this.http.put<ApiResponse<AdminTask>>(
       `${this.apiUrl}/admin/tasks/${id}`,

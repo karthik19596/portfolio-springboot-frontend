@@ -150,8 +150,58 @@
   <mat-card-header>
     <mat-card-title>All tasks</mat-card-title>
     <mat-card-subtitle>Review and remove tasks across all users.</mat-card-subtitle>
+    <span class="card-header-spacer"></span>
+    <button mat-raised-button color="primary" (click)="openAddTask()">
+      <mat-icon>assignment_ind</mat-icon>
+      Assign task
+    </button>
   </mat-card-header>
   <mat-card-content>
+    @if (showAddTask()) {
+      <form class="add-task-form" [formGroup]="newTaskForm" (ngSubmit)="createTask()">
+        <mat-form-field appearance="outline">
+          <mat-label>Title</mat-label>
+          <input matInput formControlName="title" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Description</mat-label>
+          <input matInput formControlName="description" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Assign to</mat-label>
+          <mat-select formControlName="assignedUserId">
+            @for (user of users(); track user.id) {
+              @if (isSuperAdmin() || user.role === 'USER') {
+                <mat-option [value]="user.id">{{ user.username }} ({{ user.role }})</mat-option>
+              }
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Status</mat-label>
+          <mat-select formControlName="status">
+            <mat-option value="TODO">TODO</mat-option>
+            <mat-option value="IN_PROGRESS">IN_PROGRESS</mat-option>
+            <mat-option value="DONE">DONE</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Priority</mat-label>
+          <mat-select formControlName="priority">
+            <mat-option value="LOW">LOW</mat-option>
+            <mat-option value="MEDIUM">MEDIUM</mat-option>
+            <mat-option value="HIGH">HIGH</mat-option>
+          </mat-select>
+        </mat-form-field>
+        @if (addTaskError(); as message) {
+          <div class="form-error">{{ message }}</div>
+        }
+        <div class="form-actions">
+          <button mat-raised-button color="primary" type="submit" [disabled]="creatingTask()">Assign</button>
+          <button mat-button type="button" (click)="cancelAddTask()">Cancel</button>
+        </div>
+      </form>
+    }
     <div class="table-responsive">
       <table mat-table [dataSource]="tasks()">
         <ng-container matColumnDef="title">

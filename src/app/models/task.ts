@@ -13,6 +13,7 @@ export interface TaskRequest {
   description: string;
   status: 'TODO' | 'IN_PROGRESS' | 'DONE';
   priority: 'LOW' | 'MEDIUM' | 'HIGH';
+  assignedUserId?: number;
 }
 
 export interface TaskPage<T extends Task = Task> {
