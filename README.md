@@ -17,11 +17,16 @@ Matching backend: `https://github.com/karthik19596/portfolio-springboot-backend`
 ## Features
 
 - **Login / Register** with JWT auth and role-based routing
+- Automatic access-token refresh using rotated refresh tokens
+- Password-reset request and confirmation pages
 - Real-time username and email availability checks on blur
 - Field-level server validation error messages
 - **Task Dashboard** with paginated, sortable task list
 - **Create / Edit / Delete** tasks via Material dialogs
-- **Admin Audit Logs** viewer (visible only to `ADMIN` users)
+- **Admin Dashboard** for users, roles, and tasks
+- `USER`, `ADMIN`, and `SUPER_ADMIN` role badges and navigation
+- **Admin Audit Logs** viewer (visible to `ADMIN` and `SUPER_ADMIN` users)
+- Ten-minute inactivity warning and fifteen-minute automatic logout
 - Responsive, professional Material Design layout
 
 ## Project Structure
@@ -34,8 +39,8 @@ portfolio-springboot-frontend/
 │   │   ├── guards/            # authGuard, adminGuard
 │   │   ├── interceptors/      # JWT interceptor
 │   │   ├── models/            # TypeScript interfaces
-│   │   ├── pages/             # login, register, tasks, audit-logs
-│   │   ├── services/          # Auth, Task, AuditLog services
+│   │   ├── pages/             # auth, dashboard, tasks, admin, audit-logs
+│   │   ├── services/          # Auth, Task, Admin, AuditLog services
 │   │   ├── app.config.ts      # App providers and router
 │   │   └── app.routes.ts      # Route definitions
 │   ├── index.html
@@ -100,8 +105,29 @@ Output is written to `dist/portfolio-springboot-frontend`.
 
 Use the backend signup flow or the register page in the UI to create accounts.
 
-- Admin audit logs are available only for users whose role is `ADMIN`.
-- The backend assigns the role supplied during signup (defaults to `USER`).
+- New registrations always receive the `USER` role.
+- Promote the first administrator directly in MySQL, then log out and log in again:
+
+```sql
+UPDATE users
+SET role = 'SUPER_ADMIN'
+WHERE email = 'your-email@example.com';
+```
+
+- `ADMIN` users can manage normal users and tasks.
+- `SUPER_ADMIN` users can manage all roles and administrator accounts.
+- The logged-in user's own edit and delete actions are hidden.
+- Admin access is enforced by the backend as well as the route guard.
+
+## Authentication and Session Behavior
+
+- Access tokens are refreshed automatically when they expire.
+- Refresh tokens are rotated and stored only as hashes by the backend.
+- Users receive an inactivity warning after 10 minutes and are logged out
+  after 15 minutes without activity.
+- Password reset pages are available at:
+  - `http://localhost:4200/forgot-password`
+  - `http://localhost:4200/reset-password`
 
 ## Notes
 

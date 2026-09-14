@@ -1,10 +1,12 @@
 import { Injectable, Inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, throwError } from 'rxjs';
 import { ApiResponse } from '../models/api-response';
 import {
   AuthResponse,
   LoginRequest,
+  PasswordResetConfirmRequest,
+  PasswordResetRequest,
   SignupRequest,
   User,
   UserProfile,
@@ -16,6 +18,7 @@ import { API_BASE_URL } from './api-config';
 })
 export class AuthService {
   private readonly tokenKey = 'portfolio_token';
+  private readonly refreshTokenKey = 'portfolio_refresh_token';
   private readonly userKey = 'portfolio_user';
 
   private readonly currentUser = signal<User | null>(this.loadUser());
@@ -70,6 +73,24 @@ export class AuthService {
     );
   }
 
+  requestPasswordReset(
+    request: PasswordResetRequest
+  ): Observable<ApiResponse<void>> {
+    return this.http.post<ApiResponse<void>>(
+      `${this.apiUrl}/auth/password-reset/request`,
+      request
+    );
+  }
+
+  confirmPasswordReset(
+    request: PasswordResetConfirmRequest
+  ): Observable<ApiResponse<void>> {
+    return this.http.post<ApiResponse<void>>(
+      `${this.apiUrl}/auth/password-reset/confirm`,
+      request
+    );
+  }
+
   loadProfile(): Observable<ApiResponse<UserProfile>> {
     return this.http
       .get<ApiResponse<UserProfile>>(`${this.apiUrl}/auth/me`)
@@ -100,6 +121,7 @@ export class AuthService {
   clearSession(): void {
     if (typeof window !== 'undefined') {
       localStorage.removeItem(this.tokenKey);
+      localStorage.removeItem(this.refreshTokenKey);
       localStorage.removeItem(this.userKey);
     }
     this.currentUser.set(null);
@@ -123,6 +145,35 @@ export class AuthService {
     return token;
   }
 
+  refreshToken(): Observable<ApiResponse<AuthResponse>> {
+    const refreshToken =
+      typeof window !== 'undefined'
+        ? localStorage.getItem(this.refreshTokenKey)
+        : null;
+    if (!refreshToken) {
+      return throwError(() => new Error('No refresh token available'));
+    }
+
+    return this.http
+      .post<ApiResponse<AuthResponse>>(`${this.apiUrl}/auth/refresh`, {
+        refreshToken,
+      })
+      .pipe(
+        tap((response) => {
+          if (response.success && response.data) {
+            this.saveAuth(response.data);
+          }
+        })
+      );
+  }
+
+  hasRefreshToken(): boolean {
+    return (
+      typeof window !== 'undefined' &&
+      !!localStorage.getItem(this.refreshTokenKey)
+    );
+  }
+
   /**
    * Re-checks the stored token against its `exp` claim and clears the session
    * if it has lapsed. Route guards run outside Angular's reactive graph, so the
@@ -138,6 +189,7 @@ export class AuthService {
 
   private saveAuth(auth: AuthResponse): void {
     localStorage.setItem(this.tokenKey, auth.token);
+    localStorage.setItem(this.refreshTokenKey, auth.refreshToken);
     const user: User = { username: auth.username, role: auth.role };
     localStorage.setItem(this.userKey, JSON.stringify(user));
     this.currentUser.set(user);

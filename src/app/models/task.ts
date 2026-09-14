@@ -15,8 +15,8 @@ export interface TaskRequest {
   priority: 'LOW' | 'MEDIUM' | 'HIGH';
 }
 
-export interface TaskPage {
-  content: Task[];
+export interface TaskPage<T extends Task = Task> {
+  content: T[];
   totalElements: number;
   totalPages: number;
   size: number;

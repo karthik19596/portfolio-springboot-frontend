@@ -37,7 +37,10 @@ export class Dashboard implements OnInit {
   private readonly authService = inject(AuthService);
 
   readonly user = this.authService.user;
-  readonly isAdmin = computed(() => this.user()?.role === 'ADMIN');
+  readonly isAdmin = computed(() => {
+    const role = this.user()?.role;
+    return role === 'ADMIN' || role === 'SUPER_ADMIN';
+  });
 
   stats = signal<TaskStats | null>(null);
   recentTasks = signal<Task[]>([]);

@@ -10,8 +10,18 @@ export interface SignupRequest {
   role?: string;
 }
 
+export interface PasswordResetRequest {
+  email: string;
+}
+
+export interface PasswordResetConfirmRequest {
+  token: string;
+  password: string;
+}
+
 export interface AuthResponse {
   token: string;
+  refreshToken: string;
   username: string;
   role: string;
   message: string;

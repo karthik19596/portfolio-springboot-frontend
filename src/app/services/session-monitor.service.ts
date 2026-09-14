@@ -1,4 +1,5 @@
 import { Injectable, effect, inject } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import {
@@ -9,6 +10,8 @@ import { AuthService } from './auth.service';
 
 /** How long before the token lapses the warning dialog appears. */
 const WARNING_LEAD_MS = 60_000;
+const INACTIVITY_WARNING_MS = 10 * 60 * 1000;
+const INACTIVITY_LOGOUT_MS = 15 * 60 * 1000;
 
 /**
  * Watches the active token's `exp` claim and ends the session on time.
@@ -20,12 +23,24 @@ export class SessionMonitorService {
   private readonly authService = inject(AuthService);
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
+  private readonly document = inject(DOCUMENT);
 
   private warningTimer?: ReturnType<typeof setTimeout>;
   private expiryTimer?: ReturnType<typeof setTimeout>;
+  private inactivityWarningTimer?: ReturnType<typeof setTimeout>;
+  private inactivityLogoutTimer?: ReturnType<typeof setTimeout>;
   private dialogRef?: MatDialogRef<SessionExpiryDialog, SessionExpiryResult>;
+  private readonly activityHandler = (): void => {
+    if (this.authService.isAuthenticated()) {
+      this.resetInactivityTimers();
+    }
+  };
 
   constructor() {
+    ['mousemove', 'keydown', 'click', 'touchstart', 'scroll'].forEach((event) =>
+      this.document.addEventListener(event, this.activityHandler, { passive: true })
+    );
+
     effect(() => {
       const authenticated = this.authService.isAuthenticated();
       this.clearTimers();
@@ -33,6 +48,7 @@ export class SessionMonitorService {
 
       if (authenticated) {
         this.schedule();
+        this.resetInactivityTimers();
       }
     });
   }
@@ -57,7 +73,44 @@ export class SessionMonitorService {
       this.openWarning(expiresAt);
     }
 
-    this.expiryTimer = setTimeout(() => this.endSession(), untilExpiry);
+    this.expiryTimer = setTimeout(() => this.refreshSession(), untilExpiry);
+  }
+
+  private refreshSession(): void {
+    this.authService.refreshToken().subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.clearTimers();
+          this.closeDialog();
+          this.schedule();
+        } else {
+          this.endSession();
+        }
+      },
+      error: () => this.endSession(),
+    });
+  }
+
+  private resetInactivityTimers(): void {
+    clearTimeout(this.inactivityWarningTimer);
+    clearTimeout(this.inactivityLogoutTimer);
+    this.inactivityWarningTimer = undefined;
+    this.inactivityLogoutTimer = undefined;
+    this.closeDialog();
+
+    this.inactivityWarningTimer = setTimeout(
+      () => this.openInactivityWarning(),
+      INACTIVITY_WARNING_MS
+    );
+    this.inactivityLogoutTimer = setTimeout(
+      () => this.endSession(),
+      INACTIVITY_LOGOUT_MS
+    );
+  }
+
+  private openInactivityWarning(): void {
+    if (this.dialogRef) return;
+    this.openWarning(Date.now() + INACTIVITY_LOGOUT_MS - INACTIVITY_WARNING_MS);
   }
 
   private openWarning(expiresAt: number): void {
@@ -102,6 +155,10 @@ export class SessionMonitorService {
     clearTimeout(this.expiryTimer);
     this.warningTimer = undefined;
     this.expiryTimer = undefined;
+    clearTimeout(this.inactivityWarningTimer);
+    clearTimeout(this.inactivityLogoutTimer);
+    this.inactivityWarningTimer = undefined;
+    this.inactivityLogoutTimer = undefined;
   }
 
   /** Detaches the ref first so the close does not re-enter endSession(). */

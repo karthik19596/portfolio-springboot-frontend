@@ -2,7 +2,10 @@
   <header class="dashboard-header">
     <div>
       <h1 class="dashboard-title">{{ greeting() }}, {{ user()?.username }}</h1>
-      <p class="dashboard-subtitle">Here is where your work stands today.</p>
+      <p class="dashboard-subtitle">
+        Here is where your work stands today.
+        <span class="role-badge" [class.elevated-role]="isAdmin()">{{ user()?.role }}</span>
+      </p>
     </div>
     <div class="dashboard-actions">
       <button mat-raised-button color="primary" routerLink="/tasks">

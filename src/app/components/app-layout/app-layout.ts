@@ -28,7 +28,10 @@ export class AppLayout {
   private readonly router = inject(Router);
   readonly authService = inject(AuthService);
 
-  readonly isAdmin = computed(() => this.authService.user()?.role === 'ADMIN');
+  readonly isAdmin = computed(() => {
+    const role = this.authService.user()?.role;
+    return role === 'ADMIN' || role === 'SUPER_ADMIN';
+  });
 
   readonly initials = computed(() => {
     const username = this.authService.user()?.username ?? '';
