@@ -78,6 +78,33 @@ mat-select {
   background: #e8eaf6;
 }
 
+.status-badge {
+  display: inline-block;
+  min-width: 52px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #455a64;
+  background: #eceff1;
+
+  &.active {
+    color: #1b5e20;
+    background: #e8f5e9;
+  }
+
+  &.pending {
+    color: #e65100;
+    background: #fff3e0;
+  }
+
+  &.rejected {
+    color: #b71c1c;
+    background: #ffebee;
+  }
+}
+
 .inline-input {
   width: 100%;
   max-width: 190px;

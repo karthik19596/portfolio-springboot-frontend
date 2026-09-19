@@ -1,0 +1,91 @@
+<div class="page-header">
+  <div>
+    <h1>Pending Users</h1>
+    <p>Review and approve administrator account requests.</p>
+  </div>
+  <button mat-stroked-button (click)="loadPendingUsers()">
+    <mat-icon>refresh</mat-icon>
+    Refresh
+  </button>
+</div>
+
+@if (loading()) {
+  <div class="loading-overlay"><mat-spinner diameter="40"></mat-spinner></div>
+}
+
+@if (error(); as errorMessage) {
+  <div class="error-message">
+    <mat-icon color="warn">error</mat-icon>
+    <span>{{ errorMessage }}</span>
+  </div>
+}
+
+<mat-card class="page-card">
+  <mat-card-header>
+    <mat-card-title>Accounts awaiting approval</mat-card-title>
+    <mat-card-subtitle>Approve or reject users created with ADMIN or SUPER_ADMIN roles.</mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="table-responsive">
+      <table mat-table [dataSource]="pendingUsers()">
+        <ng-container matColumnDef="username">
+          <th mat-header-cell *matHeaderCellDef>Username</th>
+          <td mat-cell *matCellDef="let user">{{ user.username }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef>Email</th>
+          <td mat-cell *matCellDef="let user">{{ user.email }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="role">
+          <th mat-header-cell *matHeaderCellDef>Requested Role</th>
+          <td mat-cell *matCellDef="let user">
+            <span class="role-badge" [class.admin-role]="user.role === 'ADMIN'">{{ user.role }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef>Requested On</th>
+          <td mat-cell *matCellDef="let user">{{ formatDate(user.createdAt) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let user">
+            <button
+              mat-raised-button
+              color="primary"
+              [disabled]="isProcessing(user.id)"
+              (click)="approve(user)">
+              @if (isProcessing(user.id)) {
+                <mat-spinner diameter="16" class="inline-spinner"></mat-spinner>
+              } @else {
+                <mat-icon>check</mat-icon>
+              }
+              Approve
+            </button>
+            <button
+              mat-stroked-button
+              color="warn"
+              [disabled]="isProcessing(user.id)"
+              (click)="reject(user)">
+              @if (isProcessing(user.id)) {
+                <mat-spinner diameter="16" class="inline-spinner"></mat-spinner>
+              } @else {
+                <mat-icon>close</mat-icon>
+              }
+              Reject
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columns"></tr>
+        <tr mat-row *matRowDef="let row; columns: columns"></tr>
+      </table>
+    </div>
+    @if (pendingUsers().length === 0 && !loading()) {
+      <div class="empty-state">No pending users.</div>
+    }
+  </mat-card-content>
+</mat-card>

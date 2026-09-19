@@ -63,8 +63,10 @@ export class AdminDashboard implements OnInit {
     status: ['TODO' as AdminTask['status'], Validators.required],
     priority: ['MEDIUM' as AdminTask['priority'], Validators.required],
   });
+  readonly editingTaskId = signal<number | null>(null);
+  readonly editingTask = signal<AdminTask | null>(null);
 
-  readonly userColumns = ['username', 'email', 'role', 'createdAt', 'actions'];
+  readonly userColumns = ['username', 'email', 'role', 'status', 'createdAt', 'actions'];
   readonly taskColumns = ['title', 'owner', 'status', 'priority', 'createdAt', 'actions'];
 
   constructor(
@@ -301,6 +303,51 @@ export class AdminDashboard implements OnInit {
       },
       error: (error) => this.showMessage(error.error?.message || 'Could not update task.'),
     });
+  }
+
+  startEditTask(task: AdminTask): void {
+    this.editingTaskId.set(task.id);
+    this.editingTask.set({ ...task });
+  }
+
+  cancelEditTask(): void {
+    this.editingTaskId.set(null);
+    this.editingTask.set(null);
+  }
+
+  saveTask(task: AdminTask): void {
+    const editedTask = this.editingTask();
+    if (!editedTask) return;
+    const request: TaskRequest = {
+      title: editedTask.title,
+      description: editedTask.description ?? '',
+      status: editedTask.status,
+      priority: editedTask.priority,
+    };
+    this.adminService.updateTask(task.id, request).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.tasks.update((tasks) =>
+            tasks.map((item) => (item.id === task.id ? response.data : item))
+          );
+          this.showMessage('Task updated.');
+          this.cancelEditTask();
+        }
+      },
+      error: (error) => this.showMessage(error.error?.message || 'Could not update task.'),
+    });
+  }
+
+  setEditingTaskField(field: 'title' | 'description', value: string): void {
+    this.editingTask.update((task) => (task ? { ...task, [field]: value } : task));
+  }
+
+  setEditingTaskStatus(status: AdminTask['status']): void {
+    this.editingTask.update((task) => (task ? { ...task, status } : task));
+  }
+
+  setEditingTaskPriority(priority: AdminTask['priority']): void {
+    this.editingTask.update((task) => (task ? { ...task, priority } : task));
   }
 
   formatDate(value: string): string {

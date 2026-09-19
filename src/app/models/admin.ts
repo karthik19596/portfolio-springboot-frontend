@@ -5,6 +5,7 @@ export interface AdminUser {
   username: string;
   email: string;
   role: 'USER' | 'ADMIN' | 'SUPER_ADMIN';
+  status: 'ACTIVE' | 'PENDING' | 'REJECTED';
   createdAt: string;
 }
 

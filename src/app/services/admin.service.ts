@@ -22,6 +22,18 @@ export class AdminService {
     return this.http.get<ApiResponse<AdminUser[]>>(`${this.apiUrl}/admin/users`);
   }
 
+  getPendingUsers(): Observable<ApiResponse<AdminUser[]>> {
+    return this.http.get<ApiResponse<AdminUser[]>>(`${this.apiUrl}/admin/users/pending`);
+  }
+
+  approveUser(id: number): Observable<ApiResponse<AdminUser>> {
+    return this.http.post<ApiResponse<AdminUser>>(`${this.apiUrl}/admin/users/${id}/approve`, {});
+  }
+
+  rejectUser(id: number): Observable<ApiResponse<void>> {
+    return this.http.post<ApiResponse<void>>(`${this.apiUrl}/admin/users/${id}/reject`, {});
+  }
+
   createUser(
     request: AdminUserCreateRequest
   ): Observable<ApiResponse<AdminUser>> {

@@ -9,6 +9,8 @@ import { Dashboard } from './pages/dashboard/dashboard';
 import { Tasks } from './pages/tasks/tasks';
 import { AuditLogs } from './pages/audit-logs/audit-logs';
 import { AdminDashboard } from './pages/admin-dashboard/admin-dashboard';
+import { PendingUsers } from './pages/pending-users/pending-users';
+import { NotFound } from './pages/not-found/not-found';
 import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
 import { guestGuard } from './guards/guest.guard';
@@ -39,7 +41,13 @@ export const routes: Routes = [
         component: AdminDashboard,
         canActivate: [adminGuard],
       },
+      {
+        path: 'admin/pending-users',
+        component: PendingUsers,
+        canActivate: [adminGuard],
+      },
     ],
   },
-  { path: '**', redirectTo: '' },
+  { path: 'not-found', component: NotFound },
+  { path: '**', redirectTo: '/not-found' },
 ];
